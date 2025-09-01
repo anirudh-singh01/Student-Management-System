@@ -243,7 +243,14 @@
                 },
                 body: JSON.stringify(student)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.error || 'Failed to add student');
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 showMessage('Student added successfully!', 'success');
                 resetForm();
@@ -291,7 +298,14 @@
                 },
                 body: JSON.stringify(student)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.error || 'Failed to update student');
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 showMessage('Student updated successfully!', 'success');
                 resetForm();

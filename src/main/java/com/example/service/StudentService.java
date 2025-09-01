@@ -23,6 +23,11 @@ public class StudentService {
      * CREATE - Save a new student
      */
     public Student saveStudent(Student student) {
+        // Check if email already exists
+        Student existingStudent = studentRepository.findByEmail(student.getEmail());
+        if (existingStudent != null) {
+            throw new RuntimeException("Email already exists. Please use a different email address.");
+        }
         return studentRepository.save(student);
     }
     
@@ -52,6 +57,14 @@ public class StudentService {
      */
     public Student updateStudent(Student student) {
         if (studentRepository.existsById(student.getId())) {
+            // Check if email is being changed and if it already exists for another student
+            Student existingStudent = studentRepository.findById(student.getId()).orElse(null);
+            if (existingStudent != null && !existingStudent.getEmail().equals(student.getEmail())) {
+                Student studentWithSameEmail = studentRepository.findByEmail(student.getEmail());
+                if (studentWithSameEmail != null) {
+                    throw new RuntimeException("Email already exists. Please use a different email address.");
+                }
+            }
             return studentRepository.save(student);
         }
         throw new RuntimeException("Student not found with id: " + student.getId());

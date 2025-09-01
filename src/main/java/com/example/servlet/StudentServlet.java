@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -77,6 +76,24 @@ public class StudentServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_CREATED);
             objectMapper.writeValue(response.getWriter(), savedStudent);
             
+        } catch (javax.persistence.PersistenceException e) {
+            // Handle unique constraint violations
+            if (e.getCause() != null && e.getCause().getMessage().contains("Unique index")) {
+                response.setStatus(HttpServletResponse.SC_CONFLICT);
+                objectMapper.writeValue(response.getWriter(), 
+                    java.util.Map.of("error", "Email already exists. Please use a different email address."));
+            } else {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            }
+        } catch (RuntimeException e) {
+            // Handle business logic exceptions
+            if (e.getMessage().contains("Email already exists")) {
+                response.setStatus(HttpServletResponse.SC_CONFLICT);
+                objectMapper.writeValue(response.getWriter(), 
+                    java.util.Map.of("error", e.getMessage()));
+            } else {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            }
         } catch (Exception e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -105,6 +122,24 @@ public class StudentServlet extends HttpServlet {
             }
         } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid ID format");
+        } catch (javax.persistence.PersistenceException e) {
+            // Handle unique constraint violations
+            if (e.getCause() != null && e.getCause().getMessage().contains("Unique index")) {
+                response.setStatus(HttpServletResponse.SC_CONFLICT);
+                objectMapper.writeValue(response.getWriter(), 
+                    java.util.Map.of("error", "Email already exists. Please use a different email address."));
+            } else {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            }
+        } catch (RuntimeException e) {
+            // Handle business logic exceptions
+            if (e.getMessage().contains("Email already exists")) {
+                response.setStatus(HttpServletResponse.SC_CONFLICT);
+                objectMapper.writeValue(response.getWriter(), 
+                    java.util.Map.of("error", e.getMessage()));
+            } else {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            }
         } catch (Exception e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
